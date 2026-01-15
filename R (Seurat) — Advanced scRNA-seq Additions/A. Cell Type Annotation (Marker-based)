@@ -1,0 +1,34 @@
+############################################################
+# 12. Identify Cluster Markers
+############################################################
+markers <- FindAllMarkers(
+  seurat_obj,
+  only.pos = TRUE,
+  min.pct = 0.25,
+  logfc.threshold = 0.25
+)
+
+# View top markers per cluster
+top_markers <- markers %>%
+  group_by(cluster) %>%
+  top_n(n = 5, wt = avg_log2FC)
+
+# Save markers
+write.csv(markers, "results/cluster_markers.csv")
+
+############################################################
+# 13. Manual Cell Type Annotation
+############################################################
+# Example: annotate based on known marker genes
+new.cluster.ids <- c(
+  "T cells",
+  "B cells",
+  "Monocytes",
+  "NK cells",
+  "Dendritic cells"
+)
+
+names(new.cluster.ids) <- levels(seurat_obj)
+seurat_obj <- RenameIdents(seurat_obj, new.cluster.ids)
+
+DimPlot(seurat_obj, reduction = "umap", label = TRUE)
