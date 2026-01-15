@@ -1,0 +1,29 @@
+############################################################
+# 12. Marker Gene Identification
+############################################################
+sc.tl.rank_genes_groups(
+    adata,
+    groupby="leiden",
+    method="wilcoxon"
+)
+
+sc.pl.rank_genes_groups(adata, n_genes=5)
+
+# Save markers
+markers = sc.get.rank_genes_groups_df(adata, None)
+markers.to_csv("results/cluster_markers_scanpy.csv", index=False)
+
+############################################################
+# 13. Manual Cell Type Annotation
+############################################################
+cluster_to_celltype = {
+    "0": "T cells",
+    "1": "B cells",
+    "2": "Monocytes",
+    "3": "NK cells",
+    "4": "Dendritic cells"
+}
+
+adata.obs["cell_type"] = adata.obs["leiden"].map(cluster_to_celltype)
+
+sc.pl.umap(adata, color="cell_type")
