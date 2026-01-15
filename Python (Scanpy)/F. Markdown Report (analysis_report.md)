@@ -1,0 +1,29 @@
+# Single-cell RNA-seq Analysis Report
+
+**Author:** Dr. Divya Mishra, Ph.D.
+
+## Overview
+This report presents a complete single-cell RNA-seq analysis including
+quality control, clustering, cell type annotation, differential expression,
+and pathway enrichment.
+
+## Methods
+- Scanpy-based preprocessing and clustering
+- Leiden clustering and UMAP visualization
+- Differential expression using Wilcoxon test
+- Pathway enrichment using GSEA (gseapy)
+
+## Results
+
+### Cell Type Clustering
+![UMAP Cell Types](results/figures/umap_celltypes.png)
+
+### Marker Gene Expression
+![Marker Expression](results/figures/umap_markers.png)
+
+### Pathway Enrichment
+Top enriched pathways include immune activation and inflammatory responses.
+
+## Conclusion
+Standard scRNA-seq workflows successfully identified biologically meaningful
+cell populations and pathways.
