@@ -1,0 +1,34 @@
+############################################################
+# 15. Integration of Multiple Samples
+############################################################
+# Load multiple datasets
+sample.list <- list(
+  sample1 = Read10X("data/sample1/"),
+  sample2 = Read10X("data/sample2/")
+)
+
+# Create Seurat objects
+seurat.list <- lapply(sample.list, CreateSeuratObject)
+
+# Normalize and find variable features
+seurat.list <- lapply(seurat.list, NormalizeData)
+seurat.list <- lapply(seurat.list, FindVariableFeatures)
+
+# Find integration anchors
+anchors <- FindIntegrationAnchors(
+  object.list = seurat.list,
+  dims = 1:20
+)
+
+# Integrate data
+integrated <- IntegrateData(
+  anchorset = anchors,
+  dims = 1:20
+)
+
+# Downstream analysis
+integrated <- ScaleData(integrated)
+integrated <- RunPCA(integrated)
+integrated <- RunUMAP(integrated, dims = 1:20)
+
+DimPlot(integrated, group.by = "orig.ident")
