@@ -1,0 +1,19 @@
+############################################################
+# 17. Save Figures
+############################################################
+
+# Save UMAP colored by cell type
+sc.pl.umap(
+    adata,
+    color="cell_type",
+    save="_celltypes.png",
+    show=False
+)
+
+# Save marker gene expression
+sc.pl.umap(
+    adata,
+    color=["CD3D", "MS4A1", "LYZ"],
+    save="_markers.png",
+    show=False
+)
