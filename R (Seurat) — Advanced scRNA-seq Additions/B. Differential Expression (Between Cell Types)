@@ -1,0 +1,13 @@
+############################################################
+# 14. Differential Expression Analysis
+############################################################
+# Compare two cell types
+de_results <- FindMarkers(
+  seurat_obj,
+  ident.1 = "T cells",
+  ident.2 = "Monocytes",
+  min.pct = 0.25
+)
+
+# Save DE results
+write.csv(de_results, "results/DE_Tcells_vs_Monocytes.csv")
