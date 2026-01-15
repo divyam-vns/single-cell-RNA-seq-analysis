@@ -1,0 +1,105 @@
+############################################################
+# Single-cell RNA-seq Analysis using Scanpy
+# Author: Divya Mishra, Ph.D.
+# Description:
+#   End-to-end scRNA-seq analysis including QC, normalization,
+#   dimensionality reduction, clustering, and visualization.
+############################################################
+
+# -----------------------------
+# 1. Import Required Libraries
+# -----------------------------
+import scanpy as sc
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# -----------------------------
+# 2. Load scRNA-seq Data
+# Assumes 10x Genomics format
+# -----------------------------
+adata = sc.read_10x_mtx(
+    "data/filtered_feature_bc_matrix",
+    var_names="gene_symbols",
+    cache=True
+)
+
+# -----------------------------
+# 3. Basic Filtering
+# -----------------------------
+sc.pp.filter_cells(adata, min_genes=200)
+sc.pp.filter_genes(adata, min_cells=3)
+
+# -----------------------------
+# 4. Quality Control Metrics
+# -----------------------------
+# Identify mitochondrial genes
+adata.var["mt"] = adata.var_names.str.startswith("MT-")
+
+# Calculate QC metrics
+sc.pp.calculate_qc_metrics(
+    adata,
+    qc_vars=["mt"],
+    percent_top=None,
+    log1p=False,
+    inplace=True
+)
+
+# Visualize QC metrics
+sc.pl.violin(
+    adata,
+    ["n_genes_by_counts", "total_counts", "pct_counts_mt"],
+    jitter=0.4
+)
+
+# Filter cells based on QC
+adata = adata[
+    (adata.obs.n_genes_by_counts > 200) &
+    (adata.obs.n_genes_by_counts < 5000) &
+    (adata.obs.pct_counts_mt < 10),
+    :
+]
+
+# -----------------------------
+# 5. Normalize and Log-transform
+# -----------------------------
+sc.pp.normalize_total(adata, target_sum=1e4)
+sc.pp.log1p(adata)
+
+# -----------------------------
+# 6. Highly Variable Genes
+# -----------------------------
+sc.pp.highly_variable_genes(
+    adata,
+    n_top_genes=2000
+)
+
+adata = adata[:, adata.var.highly_variable]
+
+# -----------------------------
+# 7. Scale Data
+# -----------------------------
+sc.pp.scale(adata, max_value=10)
+
+# -----------------------------
+# 8. PCA
+# -----------------------------
+sc.tl.pca(adata, svd_solver="arpack")
+sc.pl.pca_variance_ratio(adata, log=True)
+
+# -----------------------------
+# 9. Clustering
+# -----------------------------
+sc.pp.neighbors(adata, n_neighbors=10, n_pcs=40)
+sc.tl.leiden(adata, resolution=0.5)
+
+# -----------------------------
+# 10. UMAP Visualization
+# -----------------------------
+sc.tl.umap(adata)
+sc.pl.umap(adata, color=["leiden"])
+
+# -----------------------------
+# 11. Save Processed Object
+# -----------------------------
+adata.write("results/scanpy_processed_object.h5ad")
