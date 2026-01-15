@@ -1,0 +1,32 @@
+############################################################
+# 15. Integration of Multiple Samples
+############################################################
+# Load datasets
+adata1 = sc.read_10x_mtx("data/sample1/", var_names="gene_symbols")
+adata2 = sc.read_10x_mtx("data/sample2/", var_names="gene_symbols")
+
+adata1.obs["batch"] = "sample1"
+adata2.obs["batch"] = "sample2"
+
+# Merge datasets
+adata_combined = adata1.concatenate(
+    adata2,
+    batch_key="batch"
+)
+
+# Normalize & log-transform
+sc.pp.normalize_total(adata_combined, target_sum=1e4)
+sc.pp.log1p(adata_combined)
+
+# Batch correction using Harmony
+sc.external.pp.harmony_integrate(
+    adata_combined,
+    key="batch"
+)
+
+# Downstream analysis
+sc.pp.neighbors(adata_combined, use_rep="X_pca_harmony")
+sc.tl.umap(adata_combined)
+sc.tl.leiden(adata_combined)
+
+sc.pl.umap(adata_combined, color=["batch", "leiden"])
