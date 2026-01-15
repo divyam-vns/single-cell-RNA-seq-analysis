@@ -1,0 +1,41 @@
+############################################################
+# 16. Pathway Enrichment Analysis (GSEA)
+############################################################
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(enrichplot)
+
+# Prepare ranked gene list from DE results
+de_df <- de_results
+de_df <- de_df[order(de_df$avg_log2FC, decreasing = TRUE), ]
+
+gene_list <- de_df$avg_log2FC
+names(gene_list) <- rownames(de_df)
+
+# Convert gene symbols to Entrez IDs
+gene_ids <- bitr(
+  names(gene_list),
+  fromType = "SYMBOL",
+  toType = "ENTREZID",
+  OrgDb = org.Hs.eg.db
+)
+
+gene_list <- gene_list[gene_ids$SYMBOL]
+names(gene_list) <- gene_ids$ENTREZID
+
+# Run GSEA (GO Biological Process)
+gsea_res <- gseGO(
+  geneList = gene_list,
+  OrgDb = org.Hs.eg.db,
+  ont = "BP",
+  keyType = "ENTREZID",
+  pvalueCutoff = 0.05
+)
+
+# Save results
+write.csv(as.data.frame(gsea_res), "results/GSEA_GO_BP.csv")
+
+# Plot top pathways
+pdf("results/GSEA_dotplot.pdf")
+dotplot(gsea_res, showCategory = 10)
+dev.off()
