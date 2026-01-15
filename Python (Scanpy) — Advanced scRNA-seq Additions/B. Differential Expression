@@ -1,0 +1,16 @@
+############################################################
+# 14. Differential Expression Between Cell Types
+############################################################
+sc.tl.rank_genes_groups(
+    adata,
+    groupby="cell_type",
+    groups=["T cells"],
+    reference="Monocytes",
+    method="wilcoxon"
+)
+
+sc.pl.rank_genes_groups(adata, n_genes=10)
+
+# Save DE results
+de_df = sc.get.rank_genes_groups_df(adata, group="T cells")
+de_df.to_csv("results/DE_Tcells_vs_Monocytes_scanpy.csv", index=False)
