@@ -1,0 +1,30 @@
+---
+title: "Single-cell RNA-seq Analysis Report"
+author: "Divya Mishra, Ph.D."
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Overview
+This report summarizes quality control, clustering, cell type annotation,
+differential expression, and pathway enrichment analysis of scRNA-seq data.
+
+## Methods
+- Seurat-based QC, normalization, PCA, clustering, and UMAP
+- Marker-based cell type annotation
+- Differential expression using Wilcoxon rank-sum test
+- GSEA using clusterProfiler
+
+## Results
+### Cell Type Clustering
+![](results/UMAP_celltypes.pdf)
+
+### Differential Expression
+Top DE genes between selected cell types were identified and ranked.
+
+### Pathway Enrichment
+GSEA revealed enrichment of immune and inflammatory pathways.
+
+## Conclusion
+This analysis demonstrates robust identification of cell types and pathways
+using standard scRNA-seq workflows.
