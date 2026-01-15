@@ -1,0 +1,20 @@
+############################################################
+# 16. Pathway Enrichment Analysis (GSEA)
+############################################################
+import gseapy as gp
+
+# Use DE results from Scanpy
+de_df = sc.get.rank_genes_groups_df(adata, group="T cells")
+
+# Prepare ranked list
+ranked_genes = de_df[["names", "logfoldchanges"]]
+ranked_genes = ranked_genes.sort_values("logfoldchanges", ascending=False)
+
+# Run GSEA (GO Biological Process)
+gsea_res = gp.prerank(
+    rnk=ranked_genes,
+    gene_sets="GO_Biological_Process_2021",
+    organism="Human",
+    outdir="results/gsea_scanpy",
+    permutation_num=100
+)
