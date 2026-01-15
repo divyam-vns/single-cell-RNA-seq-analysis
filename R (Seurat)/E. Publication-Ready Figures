@@ -1,0 +1,13 @@
+############################################################
+# 17. Save Figures
+############################################################
+
+# UMAP by cell type
+pdf("results/UMAP_celltypes.pdf")
+DimPlot(seurat_obj, reduction = "umap", group.by = "ident", label = TRUE)
+dev.off()
+
+# Feature plot for marker genes
+pdf("results/FeaturePlot_markers.pdf")
+FeaturePlot(seurat_obj, features = c("CD3D", "MS4A1", "LYZ"))
+dev.off()
