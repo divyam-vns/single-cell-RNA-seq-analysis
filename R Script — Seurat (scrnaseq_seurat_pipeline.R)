@@ -1,0 +1,116 @@
+############################################################
+# Single-cell RNA-seq Analysis using Seurat
+# Author: Divya Mishra, Ph.D.
+# Description:
+#   End-to-end scRNA-seq analysis including QC, normalization,
+#   dimensionality reduction, clustering, and visualization.
+############################################################
+
+# -----------------------------
+# 1. Load Required Libraries
+# -----------------------------
+library(Seurat)
+library(dplyr)
+library(ggplot2)
+
+# -----------------------------
+# 2. Load scRNA-seq Data
+# Assumes 10x Genomics format
+# -----------------------------
+data_dir <- "data/filtered_feature_bc_matrix"
+counts <- Read10X(data.dir = data_dir)
+
+# -----------------------------
+# 3. Create Seurat Object
+# -----------------------------
+seurat_obj <- CreateSeuratObject(
+  counts = counts,
+  project = "scRNAseq_Project",
+  min.cells = 3,
+  min.features = 200
+)
+
+# -----------------------------
+# 4. Quality Control (QC)
+# -----------------------------
+# Calculate mitochondrial gene percentage
+seurat_obj[["percent.mt"]] <- PercentageFeatureSet(
+  seurat_obj,
+  pattern = "^MT-"
+)
+
+# Visualize QC metrics
+VlnPlot(
+  seurat_obj,
+  features = c("nFeature_RNA", "nCount_RNA", "percent.mt"),
+  ncol = 3
+)
+
+# Filter low-quality cells
+seurat_obj <- subset(
+  seurat_obj,
+  subset = nFeature_RNA > 200 &
+           nFeature_RNA < 5000 &
+           percent.mt < 10
+)
+
+# -----------------------------
+# 5. Normalize Data
+# -----------------------------
+seurat_obj <- NormalizeData(
+  seurat_obj,
+  normalization.method = "LogNormalize",
+  scale.factor = 10000
+)
+
+# -----------------------------
+# 6. Identify Highly Variable Genes
+# -----------------------------
+seurat_obj <- FindVariableFeatures(
+  seurat_obj,
+  selection.method = "vst",
+  nfeatures = 2000
+)
+
+# -----------------------------
+# 7. Scale Data
+# -----------------------------
+seurat_obj <- ScaleData(
+  seurat_obj,
+  features = rownames(seurat_obj)
+)
+
+# -----------------------------
+# 8. Perform PCA
+# -----------------------------
+seurat_obj <- RunPCA(
+  seurat_obj,
+  features = VariableFeatures(seurat_obj)
+)
+
+ElbowPlot(seurat_obj)
+
+# -----------------------------
+# 9. Clustering
+# -----------------------------
+seurat_obj <- FindNeighbors(seurat_obj, dims = 1:10)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.5)
+
+# -----------------------------
+# 10. UMAP Visualization
+# -----------------------------
+seurat_obj <- RunUMAP(seurat_obj, dims = 1:10)
+
+DimPlot(
+  seurat_obj,
+  reduction = "umap",
+  label = TRUE
+)
+
+# -----------------------------
+# 11. Save Processed Object
+# -----------------------------
+saveRDS(
+  seurat_obj,
+  file = "results/seurat_processed_object.rds"
+)
